@@ -3,10 +3,13 @@ package sa.edu.iau.cshj.studyplanner.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,13 +23,15 @@ import androidx.compose.ui.unit.dp
 data class PlannerUiState(
     val greeting: String = "Welcome back, Layan",
     val completedTasks: Int = 0,
-    val totalTasks: Int = 5
+    val totalTasks: Int = 3,
+    val tasks: List<String> = emptyList()
 )
 
 @Composable
 fun PlannerHomeScreen(
     uiState: PlannerUiState,
-    onCompleteTask: () -> Unit,
+    onCompleteTaskClick: () -> Unit,
+    onTaskClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -34,7 +39,7 @@ fun PlannerHomeScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = uiState.greeting,
@@ -45,35 +50,57 @@ fun PlannerHomeScreen(
             style = MaterialTheme.typography.bodyLarge
         )
         Button(
-            onClick = onCompleteTask,
+            onClick = onCompleteTaskClick,
             enabled = uiState.completedTasks < uiState.totalTasks
         ) {
             Text(text = "Mark Next Task Done")
+        }
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Text(
+            text = "Study Tasks",
+            style = MaterialTheme.typography.titleMedium
+        )
+        uiState.tasks.forEach { task ->
+            OutlinedButton(
+                onClick = { onTaskClick(task) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = task)
+            }
         }
     }
 }
 
 @Composable
-fun PlannerHomeRoute() {
+fun PlannerHomeRoute(
+    onTaskClick: (String) -> Unit
+) {
+    val initialTasks = listOf(
+        "CSC 402 Lab 5 report",
+        "Database schema review",
+        "HCI prototype check"
+    )
     var uiState by remember {
         mutableStateOf(
             PlannerUiState(
                 greeting = "Welcome back, Layan",
                 completedTasks = 0,
-                totalTasks = 5
+                totalTasks = initialTasks.size,
+                tasks = initialTasks
             )
         )
     }
 
     PlannerHomeScreen(
         uiState = uiState,
-        onCompleteTask = {
+        onCompleteTaskClick = {
             if (uiState.completedTasks < uiState.totalTasks) {
                 uiState = uiState.copy(
                     completedTasks = uiState.completedTasks + 1
                 )
             }
-        }
+        },
+        onTaskClick= onTaskClick
     )
 }
 
@@ -85,9 +112,11 @@ private fun PlannerHomeEmptyPreview() {
             uiState = PlannerUiState(
                 greeting = "Welcome back, Layan",
                 completedTasks = 0,
-                totalTasks = 5
+                totalTasks = 3,
+                tasks =listOf("CSC 402 Lab 5 report","Database schema review","HCI prototype check")
             ),
-            onCompleteTask = {}
+            onCompleteTaskClick = {},
+            onTaskClick  ={}
         )
     }
 }
@@ -99,10 +128,12 @@ private fun PlannerHomeCompletedPreview() {
         PlannerHomeScreen(
             uiState = PlannerUiState(
                 greeting = "Welcome back, Layan",
-                completedTasks = 5,
-                totalTasks = 5
+                completedTasks = 3,
+                totalTasks = 3,
+                tasks = listOf("CSC 402 Lab 5 report", "Database schema review", "HCI prototype check")
             ),
-            onCompleteTask = {}
+            onCompleteTaskClick = {},
+            onTaskClick={}
         )
     }
 }
